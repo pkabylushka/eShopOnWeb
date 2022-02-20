@@ -21,6 +21,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Logging.AddConsole();
 
+var vaultName = builder.Configuration.GetValue(typeof(string), "VaultName") as string;
+if (!string.IsNullOrEmpty(vaultName))
+{
+    builder.Configuration.AddAzureKeyVault($"https://{vaultName}.vault.azure.net/");
+}
+
 Microsoft.eShopWeb.Infrastructure.Dependencies.ConfigureServices(builder.Configuration, builder.Services);
 
 builder.Services.AddCookieSettings();
@@ -73,6 +79,9 @@ builder.Services.Configure<ServiceConfig>(config =>
     config.Services = new List<ServiceDescriptor>(builder.Services);
     config.Path = "/allservices";
 });
+
+// Warehouse configuration
+builder.Services.Configure<WarehouseSettings>(builder.Configuration);
 
 // blazor configuration
 var configSection = builder.Configuration.GetRequiredSection(BaseUrlConfiguration.CONFIG_NAME);
